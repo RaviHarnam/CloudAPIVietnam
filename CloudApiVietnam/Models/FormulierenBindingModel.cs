@@ -6,15 +6,18 @@ using System.Web;
 
 namespace CloudApiVietnam.Models
 {
-    public class FormulierenBindingModel
-    {
-     
-        [Required(ErrorMessage = "Naam is verplicht")]
-        [Display(Name = "Email")]
-        public string Name { get; set; }
+  public class FormulierenBindingModel
+  {
+    [Required(ErrorMessage = "Naam is verplicht")]
+    [Display(Name = "Email")]
+    public string Name { get; set; }
 
-        public string Region { get; set; }
-        public string FormTemplate { get; set; }
-        public List<FormContent> FormContent { get; set; }
-    }
+    public string Region { get; set; }
+    public string FormTemplate { get; set; }
+
+    public DateTime Created { get; set; }
+
+    public DateTime Updated { get; set; }
+    public List<FormContent> FormContent { get; set; }
+  }
 }

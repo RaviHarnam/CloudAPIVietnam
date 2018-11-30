@@ -81,6 +81,7 @@ namespace CloudApiVietnam.Tests.Controllers
             formulierenBindingModel.Name = "Testformulier9999";
             formulierenBindingModel.Region = "Zuid-Holland";
             formulierenBindingModel.FormTemplate = "[{'Naam':'string'},{'Leeftijd':'string'},{'Afwijking':'string'}]";
+            formulierenBindingModel.Created = DateTime.Now;
 
             // Act
             HttpResponseMessage actionResult = controller.Post(formulierenBindingModel);
@@ -88,6 +89,61 @@ namespace CloudApiVietnam.Tests.Controllers
             // Assert
             Assert.AreEqual(actionResult.StatusCode, HttpStatusCode.OK);
         }
+
+      
+      [TestMethod]
+      public void FormPost_Ok_CanCreateDateTime()
+      {
+        // Arramge
+        FormulierenController controller = GetController();
+        //FormulierenBindingModel formulierenBindingModel = new FormulierenBindingModel();
+        //formulierenBindingModel.Name = "Testformulier9999";
+        //formulierenBindingModel.Region = "Zuid-Holland";
+        //formulierenBindingModel.FormTemplate = "[{'Naam':'string'},{'Leeftijd':'string'},{'Afwijking':'string'}]";
+        //formulierenBindingModel.Created = DateTime.Now;
+        //formulierenBindingModel.Updated = DateTime.Now;
+
+        var formulierBindingModel = new FormulierenBindingModel
+        {
+          Name = "TestFormulier1234",
+          Region = "Hanoi",
+          FormTemplate =  "{'Name':'string', 'BirthYear': 'string', 'SchoolName':'string', 'Gender':'string'}",
+          Created = DateTime.Now,
+         
+
+        };
+        // Act
+        HttpResponseMessage actionResult = controller.Post(formulierBindingModel);
+
+        // Assert
+        Assert.AreEqual(actionResult.StatusCode, HttpStatusCode.OK);
+      }
+
+      [TestMethod]
+      public void FormCanUpdateDateTime()
+      {
+        //Arrange
+        FormulierenController formulierController = GetController();
+        FormulierenBindingModel formulierenBindingModel = new FormulierenBindingModel()
+        {
+          Name = "UpdatedVietam",
+          Region = "Hanoi",
+          FormTemplate =  "{'Name':'string', 'BirthYear': 'string', 'SchoolName':'string', 'Gender':'string'}",
+          Updated = DateTime.Now
+        };
+
+        //Act
+        HttpResponseMessage actionResult = formulierController.Put(6, formulierenBindingModel);
+
+        //Assert
+        if (actionResult.StatusCode == HttpStatusCode.OK)
+        {
+          Assert.AreEqual(actionResult.StatusCode, HttpStatusCode.OK);
+        }
+     
+
+      }
+
 
         [TestMethod]
         public void FormPost_BadRequest()
@@ -154,42 +210,6 @@ namespace CloudApiVietnam.Tests.Controllers
             Assert.AreEqual(result.StatusCode, HttpStatusCode.OK);
             Assert.IsNotNull(resultContent);
         }
-
-        //[TestMethod]
-        //public void Put_Add_Succes()
-        //{
-        //    FormulierenBindingModel formBindingModel = new FormulierenBindingModel();
-        //    FormulierenController controller = GetController();
-        //    Random rnd = new Random();
-
-        //    formBindingModel.FormTemplate = "[{'Naam':'testnaam'},{'Leeftijd':'22'},{'Afwijking':'string'}]";
-        //    formBindingModel.Region = "test";
-        //    formBindingModel.Name = "name";
-
-        //    HttpResponseMessage result = controller.Put(this.id, formBindingModel);
-        //    var resultContent = result.Content.ReadAsAsync<dynamic>().Result;
-        //    // Assert
-        //    Assert.AreEqual(result.StatusCode, HttpStatusCode.OK);
-        //    Assert.IsNotNull(resultContent);
-        //}
-
-        //[TestMethod]
-        //public void Put_Delete_Succes()
-        //{
-        //    FormulierenBindingModel formBindingModel = new FormulierenBindingModel();
-        //    FormulierenController controller = GetController();
-        //    Random rnd = new Random();
-
-        //    formBindingModel.FormTemplate = "[{'Naam':'testnaam'},{'Leeftijd':'22'}]";
-        //    formBindingModel.Region = "test";
-        //    formBindingModel.Name = "name";
-
-        //    HttpResponseMessage result = controller.Put(this.id, formBindingModel);
-        //    var resultContent = result.Content.ReadAsAsync<dynamic>().Result;
-        //    // Assert
-        //    Assert.AreEqual(result.StatusCode, HttpStatusCode.OK);
-        //    Assert.IsNotNull(resultContent);
-        //}
 
         [TestMethod]
         [TestCleanup()]

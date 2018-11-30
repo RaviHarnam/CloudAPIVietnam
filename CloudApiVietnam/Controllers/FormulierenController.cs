@@ -8,6 +8,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using CloudApiVietnam.Interfaces;
+using CloudApiVietnam.Repositories;
 
 namespace CloudApiVietnam.Controllers
 {
@@ -15,7 +17,12 @@ namespace CloudApiVietnam.Controllers
     public class FormulierenController : ApiController
     {
         ApplicationDbContext db = new ApplicationDbContext();
+      private IFormulierenRepository formulierenRepository;
 
+      public FormulierenController()
+      {
+        this.formulierenRepository = new FormulierRepository(new ApplicationDbContext());
+      }
         // GET alle Formulieren
         public HttpResponseMessage Get()
         {
@@ -30,10 +37,25 @@ namespace CloudApiVietnam.Controllers
             }
         }
 
-        // GET specifiek Formulier
-        public HttpResponseMessage Get(int id)
+    //GET filter forms on date
+    public HttpResponseMessage Get(DateTime date)
+    {
+      try
+      {
+        var formulieren = formulierenRepository.getListOfFormFilterdOnDate(date);
+        return Request.CreateResponse(HttpStatusCode.OK, formulieren);
+      }
+      catch (Exception ex)
+      {
+        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex);
+      }
+    }
+
+    // GET specifiek Formulier
+    public HttpResponseMessage Get(int id)
         {
-            var formulier = db.Formulieren.Include("FormContent").Where(f => f.Id == id).FirstOrDefault();
+           // var formulier = db.Formulieren.Include("FormContent").Where(f => f.Id == id).FirstOrDefault();
+          var formulier = formulierenRepository.GetForm(id);
             if (formulier == null)
             {
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No Form found with id: " + id.ToString());
@@ -56,13 +78,17 @@ namespace CloudApiVietnam.Controllers
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "JSON in 'content' is not correct JSON: " + isJson.Error);
                 }
 
-                Formulieren formulier = new Formulieren();
-                formulier.Name = formulierenBindingModel.Name;
-                formulier.Region = formulierenBindingModel.Region;
-                formulier.FormTemplate = formulierenBindingModel.FormTemplate;
+              var formulier = new Formulieren
+              {
+                Name = formulierenBindingModel.Name,
+                Region = formulierenBindingModel.Region,
+                FormTemplate = formulierenBindingModel.FormTemplate,
+                Created = DateTime.Now,
+                
+              };
 
-                db.Formulieren.Add(formulier);
-                db.SaveChanges();
+                formulierenRepository.AddFormulieren(formulier);
+                
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
             catch (Exception ex)
@@ -71,12 +97,21 @@ namespace CloudApiVietnam.Controllers
             }
         }
 
+      public HttpResponseMessage NoFormFound(Formulieren form, int id)
+      {
+        if (form == null)
+          return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No form found with id: " + id.ToString());
+
+        return Request.CreateErrorResponse(HttpStatusCode.Found, $"Form with id:{id.ToString()} have been found");
+      }
+
         // PUT api/values/5
         public HttpResponseMessage Put(int id, [FromBody]FormulierenBindingModel UpdateObject)
         {
             try
             {
-                var form = db.Formulieren.Where(f => f.Id == id).FirstOrDefault();
+                //var form = db.Formulieren.Where(f => f.Id == id).FirstOrDefault();
+                 var form = formulierenRepository.GetForm(id);
 
                 if (form == null)
                     return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No form found with id: " + id.ToString());
@@ -92,6 +127,10 @@ namespace CloudApiVietnam.Controllers
                 form.Name = UpdateObject.Name;
                 form.Region = UpdateObject.Region;
                 form.FormTemplate = UpdateObject.FormTemplate;
+               // form.Updated = DateTime.Now;
+                form.Updated = UpdateObject.Updated;
+              // om postman calls te gemakkelijken, dus minder typwerk zou je hier form.Updated = DateTime.Now kunnen gebruiken.
+              // Echter voor de test is het niet nodig omdat bij een test dmv het FormulierenBindingModel wordt meegegeven.
 
                 var formContentList = db.FormContent.Where(s => s.FormulierenId == id).ToList(); //get all the formContents related to the form
 
@@ -144,8 +183,9 @@ namespace CloudApiVietnam.Controllers
             {
                 try
                 {
-                    db.Formulieren.Remove(formulier);
-                    db.SaveChanges();
+                  formulierenRepository.RemoveFormulieren(formulier);
+                    //db.Formulieren.Remove(formulier);
+                    //db.SaveChanges();
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 catch (Exception ex)

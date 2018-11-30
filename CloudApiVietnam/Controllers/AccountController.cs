@@ -1,4 +1,4 @@
-﻿using System;
+﻿  using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
@@ -130,7 +130,8 @@ namespace CloudApiVietnam.Controllers
                
         //POST /api/Account
         //Voor nu even AllowAnonymous voor het eenvoudig testen[]
-        [Authorize(Roles ="Admin")]
+        //[Authorize(Roles ="Admin")]
+        [AllowAnonymous]
         public HttpResponseMessage Post(RegisterBindingModel model)
         {
             try
